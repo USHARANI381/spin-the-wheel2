@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin the Wheel Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            position: relative;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: #aaa;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            width: 100%;
+        }
+        
+        .wheel-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+        
+        .wheel {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 
+                0 0 0 8px #2d3047,
+                0 0 20px rgba(0, 0, 0, 0.5),
+                inset 0 0 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s ease-out;
+        }
+        
+        .slice {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            left: 0;
+            top: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+        }
+        
+        .slice-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-origin: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 30px;
+            transform: rotate(54deg);
+        }
+        
+        .slice-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .slice-text {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 50px;
+            z-index: 10;
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
+        }
+        
+        .pointer i {
+            color: #ff7e5f;
+            font-size: 3rem;
+        }
+        
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: #2d3047;
+            border-radius: 50%;
+            z-index: 5;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ff7e5f;
+            font-size: 1.5rem;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            max-width: 400px;
+        }
+        
+        .spin-button {
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 0 #cc654c, 0 8px 20px rgba(255, 126, 95, 0.4);
+            letter-spacing: 1px;
+        }
+        
+        .spin-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #cc654c, 0 10px 25px rgba(255, 126, 95, 0.5);
+        }
+        
+        .spin-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 0 #cc654c, 0 6px 15px rgba(255, 126, 95, 0.4);
+        }
+        
+        .spin-button:disabled {
+            background: linear-gradient(90deg, #777, #999);
+            box-shadow: 0 6px 0 #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .result h3 {
+            margin-bottom: 15px;
+            color: #ff7e5f;
+            font-size: 1.4rem;
+        }
+        
+        .result-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .result-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+        
+        .result-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .history {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .history h3 {
+            margin-bottom: 15px;
+            color: #ff7e5f;
+            font-size: 1.4rem;
+        }
+        
+        .history-list {
+            list-style: none;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .history-list li {
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .history-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #ff7e5f;
+            font-size: 1.4rem;
+        }
+        
+        .instructions p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+            color: #ccc;
+        }
+        
+        @media (max-width: 900px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .wheel-container {
+                width: 320px;
+                height: 320px;
+            }
+            
+            .slice-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .slice-text {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 500px) {
+            .wheel-container {
+                width: 280px;
+                height: 280px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .controls {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-dharmachakra"></i> Spin the Wheel</h1>
+            <p class="subtitle">Spin the wheel to win exciting prizes! Each slice contains a different reward.</p>
+        </header>
+        
+        <div class="game-area">
+            <div class="wheel-container">
+                <div class="wheel" id="wheel">
+                    <!-- Wheel slices will be generated by JavaScript -->
+                </div>
+                <div class="pointer">
+                    <i class="fas fa-caret-down"></i>
+                </div>
+                <div class="center-circle">
+                    <i class="fas fa-redo"></i>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="spin-button" id="spin-button">
+                    <i class="fas fa-play-circle"></i> SPIN THE WHEEL
+                </button>
+                
+                <div class="result">
+                    <h3>Last Result</h3>
+                    <div class="result-content">
+                        <div class="result-icon" id="result-icon" style="background-color: #ff7e5f;">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div class="result-text" id="result-text">Spin the wheel to see what you win!</div>
+                    </div>
+                </div>
+                
+                <div class="history">
+                    <h3>Spin History</h3>
+                    <ul class="history-list" id="history-list">
+                        <!-- History items will be added here -->
+                    </ul>
+                </div>
+                
+                <div class="instructions">
+                    <h3>How to Play</h3>
+                    <p>1. Click the "SPIN THE WHEEL" button to start spinning.</p>
+                    <p>2. The wheel will spin with realistic physics and gradually slow down.</p>
+                    <p>3. When the wheel stops, the pointer will indicate your prize.</p>
+                    <p>4. Your spin history will be displayed below.</p>
+              <button type="button" class="spin-button" id="reset-button"
+    style="margin-top:20px;background:#444;box-shadow:0 6px 0 #222;">
+    RESET GAME
+</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Wheel data: each slice has an icon, text, color and icon color
+      const wheelData = [
+  {
+    text: "100rupees cashback",
+    img: "assets/100.jpg",
+    color: "#ff7e5f"
+  },
+  {
+    text: "50rupees cashback",
+    img: "assets/images.jpg",
+    color: "#6a82fb"
+  },
+  {
+    text: "KFC",
+    img: "assets/download.jpg",
+    color: "#43cea2"
+  },
+  {
+    text: "HALF KG CAKE",
+    img: "assets/images.jpg",
+    color: "#f7971e"
+  },
+  {
+    text: "50 RUPEES CASHBACK",
+    img: "assets/images.jpg",
+    color: "#8e2de2"
+  }
+];
+
+
+        // Game state
+      // Game state
+let isSpinning = false;
+let hasSpunOnce = false;   // ← ADD THIS
+let currentRotation = 0;
+let spinHistory = [];
+
+        
+        // DOM elements
+        const wheel = document.getElementById('wheel');
+        const spinButton = document.getElementById('spin-button');
+        const resultIcon = document.getElementById('result-icon');
+        const resultText = document.getElementById('result-text');
+        const historyList = document.getElementById('history-list');
+        
+       
+function saveGameState(state) {
+    localStorage.setItem("wheelGameState", JSON.stringify(state));
+}
+
+function loadGameState() {
+    const data = localStorage.getItem("wheelGameState");
+    return data ? JSON.parse(data) : null;
+}
+
+        // Initialize the wheel slices
+        function initializeWheel() {
+            wheel.innerHTML = '';
+            const savedState = loadGameState();
+
+if (savedState) {
+    hasSpunOnce = savedState.hasSpunOnce;
+    currentRotation = savedState.currentRotation;
+    spinHistory = savedState.spinHistory || [];
+
+    wheel.style.transition = "none";
+    wheel.style.transform = "rotate(" + currentRotation + "deg)";
+
+    if (savedState.lastWinningSliceIndex !== null) {
+        showResult(savedState.lastWinningSliceIndex);
+        spinButton.disabled = true;
+        spinButton.innerHTML = "SPIN USED";
+    } else {
+        updateHistoryDisplay();
+    }
+}
+
+            
+            // Create 5 slices (360 / 5 = 72 degrees each)
+            const sliceAngle = 360 / wheelData.length;
+            
+            wheelData.forEach((slice, index) => {
+                // Calculate the angle for this slice
+                const startAngle = index * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+                
+                // Create slice element
+                const sliceElement = document.createElement('div');
+sliceElement.className = 'slice';
+sliceElement.style.transform = "rotate(" + startAngle + "deg)";
+sliceElement.style.backgroundColor = slice.color;
+
+
+                
+                // Create slice content
+                const sliceContent = document.createElement('div');
+                sliceContent.className = 'slice-content';
+                
+                // Create icon
+                const iconElement = document.createElement('img');
+iconElement.className = 'slice-icon';
+iconElement.src = slice.img;
+iconElement.alt = slice.text;
+
+
+                
+                // Create text
+                const textElement = document.createElement('div');
+                textElement.className = 'slice-text';
+                textElement.textContent = slice.text;
+                
+                // Assemble slice
+                sliceContent.appendChild(iconElement);
+                sliceContent.appendChild(textElement);
+                sliceElement.appendChild(sliceContent);
+                
+                // Add to wheel
+                wheel.appendChild(sliceElement);
+            });
+        }
+        
+       function spinWheel() {
+  if (isSpinning || hasSpunOnce) return;
+
+  isSpinning = true;
+  spinButton.disabled = true;
+  spinButton.innerHTML =
+    '<i class="fas fa-spinner fa-spin"></i> SPINNING...';
+
+  const sliceCount = wheelData.length;
+  const sliceAngle = 360 / sliceCount;
+
+  // 1️⃣ Pick the winner FIRST
+  const winningIndex = Math.floor(Math.random() * sliceCount);
+
+  // 2️⃣ Calculate angle so that slice CENTER lands under pointer
+  // pointer visually selects 90deg (top, pointing down)
+  const targetAngle =
+    90 -
+    (winningIndex * sliceAngle + sliceAngle / 2);
+
+  // 3️⃣ Add full rotations for drama
+  const rotations = 5 + Math.floor(Math.random() * 5);
+  const finalRotation =
+    rotations * 360 + targetAngle;
+
+  wheel.style.transition =
+    'transform 4s cubic-bezier(0.17, 0.67, 0.21, 0.99)';
+  wheel.style.transform = `rotate(${finalRotation}deg)`;
+
+  currentRotation = ((finalRotation % 360) + 360) % 360;
+
+  setTimeout(() => {
+    showResult(winningIndex);
+
+    isSpinning = false;
+    hasSpunOnce = true;
+
+    saveGameState({
+      hasSpunOnce: true,
+      currentRotation,
+      lastWinningSliceIndex: winningIndex
+    });
+
+    spinButton.disabled = true;
+    spinButton.innerHTML = "SPIN USED";
+  }, 4000);
+
+  // bounce (visual only)
+  setTimeout(() => {
+    wheel.style.transition = "transform 0.25s ease-out";
+    wheel.style.transform = `rotate(${finalRotation + 2}deg)`;
+    setTimeout(() => {
+      wheel.style.transform = `rotate(${finalRotation}deg)`;
+    }, 150);
+  }, 3950);
+}
+
+
+        // Show the result of the spin
+        function showResult(sliceIndex) {
+            const winningSlice = wheelData[sliceIndex];
+            
+            // Update result display
+          resultIcon.innerHTML =
+  "<img src='" + winningSlice.img + "' style='width:100%;height:100%;border-radius:50%'>";
+
+
+            resultIcon.style.backgroundColor = winningSlice.color;
+           
+            resultText.textContent = "You won: " + winningSlice.text + "!";
+
+            
+            // Add to history
+            const historyItem = {
+                slice: winningSlice,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            
+            spinHistory.unshift(historyItem);
+            if (spinHistory.length > 5) {
+                spinHistory.pop();
+            }
+            
+            updateHistoryDisplay();
+            
+            // Show a celebration effect
+            celebrate();
+        }
+        
+        // Update the history display
+        function updateHistoryDisplay() {
+            historyList.innerHTML = '';
+            
+            spinHistory.forEach(item => {
+                const li = document.createElement('li');
+                
+                const icon = document.createElement('div');
+                icon.className = 'history-icon';
+                icon.style.backgroundColor = item.slice.color;
+               icon.innerHTML =
+  "<img src='" + item.slice.img + "' style='width:100%;height:100%;border-radius:50%'>";
+
+                
+                const text = document.createElement('div');
+               text.textContent = item.slice.text + " at " + item.timestamp;
+
+                
+                li.appendChild(icon);
+                li.appendChild(text);
+                historyList.appendChild(li);
+            });
+            
+            // Add placeholder if no history yet
+            if (spinHistory.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = "No spins yet. Spin the wheel!";
+                li.style.justifyContent = "center";
+                li.style.color = "#aaa";
+                historyList.appendChild(li);
+            }
+        }
+        
+        // Celebration effect
+        function celebrate() {
+            // Create confetti effect
+            const confettiCount = 50;
+            const container = document.querySelector('.container');
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+               confetti.textContent = "✨";
+
+
+                confetti.style.position = 'absolute';
+                confetti.style.color = wheelData[Math.floor(Math.random() * wheelData.length)].color;
+                confetti.style.fontSize = Math.random() * 15 + 10 + 'px';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-50px';
+                confetti.style.opacity = '0.8';
+                confetti.style.zIndex = '9999';
+                confetti.style.pointerEvents = 'none';
+                
+                container.appendChild(confetti);
+                
+                // Animate confetti falling
+                const animation = confetti.animate([
+                    {
+  transform:
+    "translateY(" +
+    (window.innerHeight + 100) +
+    "px) rotate(" +
+    Math.random() * 360 +
+    "deg)",
+  opacity: 0
+}
+
+                ], {
+                    duration: Math.random() * 2000 + 1000,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.9, 0.2)'
+                });
+                
+                // Remove confetti after animation
+              animation.onfinish = function () {
+  confetti.remove();
+};
+            }}
+            initializeWheel();
+spinButton.addEventListener("click", spinWheel);
+
+const resetButton = document.getElementById("reset-button");
+
+// Simple hash function
+function hashPassword(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0; // convert to 32-bit int
+    }
+    return hash;
+}
+
+// Store only the hash of your password
+const storedHash = hashPassword("letmeindsz123"); // <-- your password here
+
+resetButton.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    const input = prompt("Enter reset password:");
+
+    if (hashPassword(input) === storedHash) {
+        // Reset the game
+        localStorage.removeItem("wheelGameState");
+
+        isSpinning = false;
+        hasSpunOnce = false;
+        currentRotation = 0;
+        spinHistory = [];
+
+        wheel.style.transition = "none";
+        wheel.style.transform = "rotate(0deg)";
+
+        resultIcon.innerHTML = '<i class="fas fa-gift"></i>';
+        resultIcon.style.backgroundColor = "#ff7e5f";
+        resultText.textContent = "Spin the wheel to see what you win!";
+
+        historyList.innerHTML = "";
+
+        spinButton.disabled = false;
+        spinButton.innerHTML = "SPIN THE WHEEL";
+
+        alert("Game reset successfully!");
+    } else {
+        alert("Incorrect password! Reset aborted.");
+    }
+});
+
+
+
+</script>
